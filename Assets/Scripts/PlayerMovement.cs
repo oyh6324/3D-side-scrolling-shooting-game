@@ -10,6 +10,8 @@ public class PlayerMovement : MonoBehaviour
     public float speed ;
     public float jumpSpeed;
     private float currentJumpY;
+
+    private bool jumping;
     private void Awake()
     {
         inputKey = GetComponent<InputKey>();
@@ -17,8 +19,19 @@ public class PlayerMovement : MonoBehaviour
     }
     private void FixedUpdate()
     {
-        rigidbody.velocity = new Vector3(inputKey.horizonAxis * speed, 0f, 0f);
-        if (inputKey.jump) currentJumpY = jumpSpeed;
-        currentJumpY += Time.deltaTime * Physics.gravity.y;
+        var preY = rigidbody.velocity.y;
+        rigidbody.velocity = new Vector2(inputKey.horizonAxis * speed, preY);
+        if (inputKey.jump && !jumping)
+        {
+            rigidbody.AddForce(Vector2.up * jumpSpeed, ForceMode.Impulse);
+            jumping = true;
+        }
+    }
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.collider.tag == "Ground")
+        {
+            jumping = false;
+        }
     }
 }
